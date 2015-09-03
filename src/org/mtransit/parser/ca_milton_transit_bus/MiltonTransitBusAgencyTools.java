@@ -223,8 +223,6 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		ALL_ROUTE_TRIPS2 = map2;
 	}
 
-	private static final String INCLUDE_ROUTE_ID = null; // DEBUG
-
 	@Override
 	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
 		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
