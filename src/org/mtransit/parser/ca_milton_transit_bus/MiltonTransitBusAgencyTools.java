@@ -1,7 +1,9 @@
 package org.mtransit.parser.ca_milton_transit_bus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -90,6 +92,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String B = "B";
 	private static final String EB = "EB";
 	private static final String WB = "WB";
+	private static final String AM = "AM";
+	private static final String PM = "PM";
 
 	private static final long ROUTE_ID_ENDS_WITH_A = 10000l;
 	private static final long ROUTE_ID_ENDS_WITH_B = 20000l;
@@ -105,6 +109,14 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
 		}
 		indexOf = gRoute.getRouteShortName().indexOf(WB);
+		if (indexOf >= 0) {
+			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+		}
+		indexOf = gRoute.getRouteShortName().indexOf(AM);
+		if (indexOf >= 0) {
+			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+		}
+		indexOf = gRoute.getRouteShortName().indexOf(PM);
 		if (indexOf >= 0) {
 			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
 		}
@@ -132,15 +144,27 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		if (indexOf >= 0) {
 			return gRoute.getRouteShortName().substring(0, indexOf);
 		}
+		indexOf = gRoute.getRouteShortName().indexOf(AM);
+		if (indexOf >= 0) {
+			return gRoute.getRouteShortName().substring(0, indexOf);
+		}
+		indexOf = gRoute.getRouteShortName().indexOf(PM);
+		if (indexOf >= 0) {
+			return gRoute.getRouteShortName().substring(0, indexOf);
+		}
 		return super.getRouteShortName(gRoute);
 	}
 
 	private static final Pattern ENDS_WITH_BOUNDS = Pattern.compile("( (eastbound|westbound)$)", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern AM_PM = Pattern.compile("(^|\\s){1}(am|pm)($|\\s){1}", Pattern.CASE_INSENSITIVE);
+	private static final String AM_PM_REPLACEMENT = "$1$3";
+
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
 		String routeLongName = gRoute.getRouteLongName().toLowerCase(Locale.ENGLISH);
 		routeLongName = ENDS_WITH_BOUNDS.matcher(routeLongName).replaceAll(StringUtils.EMPTY);
+		routeLongName = AM_PM.matcher(routeLongName).replaceAll(AM_PM_REPLACEMENT);
 		return CleanUtils.cleanLabel(routeLongName);
 	}
 
@@ -200,9 +224,15 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.id, // Milton GO
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.id) // Derry
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { "2094", "2108", "2079" })) //
+						Arrays.asList(new String[] { "2094", "2108", //
+								"2103", //
+								"2060", //
+								"2079" })) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { "2079", "2083", "2094" })) //
+						Arrays.asList(new String[] { "2079", //
+								"2021", //
+								"2093", //
+								"2083", "2094" })) //
 				.compileBothTripSort());
 		map2.put(7l, new RouteTripSpec(7l, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.id, // Milton GO
@@ -271,6 +301,13 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			return;
 		} else if (mRoute.id == 41l) {
 			mTrip.setHeadsignString(GREEN, 0);
+			return;
+		}
+		if (gTrip.getRouteId().endsWith(AM)) {
+			mTrip.setHeadsignString(AM, 0);
+			return;
+		} else if (gTrip.getRouteId().endsWith(PM)) {
+			mTrip.setHeadsignString(PM, 1);
 			return;
 		}
 		System.out.printf("\n%s: Unexpected trip %s!\n", mRoute.id, gTrip);
