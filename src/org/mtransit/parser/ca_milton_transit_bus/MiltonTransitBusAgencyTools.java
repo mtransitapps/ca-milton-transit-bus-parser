@@ -1,9 +1,7 @@
 package org.mtransit.parser.ca_milton_transit_bus;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
