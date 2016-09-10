@@ -222,11 +222,34 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Milton GO
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Derry
 				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { "2094", "2106", //
-								"2079" })) //
+						Arrays.asList(new String[] { //
+						"2092", // == SCOTT BV AT DERRY RD
+								"2093", // != DERRY RD AT SCOTT BV
+								"2094", // SAVOLINE BV AT DERRY RD
+								"2103", // == PRINGLE AV AT WIGGLESWORTH CR
+								"2104", // != SCOTT BV AT PRINGLE AV
+								"2106", // SCOTT BV AT FORBES TERR
+								"2059", // != MAIN ST E AT ONTARIO ST S
+								"2194", // != DERRY RD AT BRONTE ST S
+								"2119", // != ONTARIO ST S OPPOSITE PINE ST
+								"2060", // == MAIN ST E AT ONTARIO ST S
+								"2079" // MILTON GO STATION - 6 PLATFORM
+						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { "2079", //
-								"2083", "2092", "2094" })) //
+						Arrays.asList(new String[] { //
+						"2079", // MILTON GO STATION - 6 PLATFORM
+								"2019", // DREW CTR AT MAIN ST E
+								"2021", // ==
+								"2022", // !=
+								"2093", // != DERRY RD AT SCOTT BV
+								"2094", // SAVOLINE BV AT DERRY RD
+								"2103", // == PRINGLE AV AT WIGGLESWORTH CR
+								"2088", // SCOTT BV AT WIGGLESWORTH CR
+								"2083", // SCOTT BV AT MAIN ST W
+								"2091", // SCOTT BV AT WESTON DR
+								"2092", // SCOTT BV AT DERRY RD
+								"2380", "2178", // !=
+						})) //
 				.compileBothTripSort());
 		map2.put(7l, new RouteTripSpec(7l, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Milton GO
