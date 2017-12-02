@@ -119,12 +119,13 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
 		}
 		Matcher matcher = DIGITS.matcher(gRoute.getRouteShortName());
-		matcher.find();
-		long id = Long.parseLong(matcher.group());
-		if (gRoute.getRouteShortName().endsWith(A)) {
-			return ROUTE_ID_ENDS_WITH_A + id;
-		} else if (gRoute.getRouteShortName().endsWith(B)) {
-			return ROUTE_ID_ENDS_WITH_B + id;
+		if (matcher.find()) {
+			long id = Long.parseLong(matcher.group());
+			if (gRoute.getRouteShortName().endsWith(A)) {
+				return ROUTE_ID_ENDS_WITH_A + id;
+			} else if (gRoute.getRouteShortName().endsWith(B)) {
+				return ROUTE_ID_ENDS_WITH_B + id;
+			}
 		}
 		System.out.printf("\nUnexpected route ID for %s!\n", gRoute);
 		System.exit(-1);
