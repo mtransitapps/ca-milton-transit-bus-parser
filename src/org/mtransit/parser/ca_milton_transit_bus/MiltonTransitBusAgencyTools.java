@@ -468,21 +468,22 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2094", // Derry (Savoline)
 								"2096", // Hinchey
-								"2103", // ++
-								"2104", // ++
-								"2106", // ++
-								"2059", // ++
-								"2060", // ++
+								"2052", // == Bronte
+								"2054", // != Brown
+								"2110", // != Fulton
+								"2055", // != Mill
+								"2057", // != TransCab Transfer Point Westbound
+								"2058", // == Court
 								"2203" // Milton GO Station
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
 						"2203", // Milton GO Station
-								"2019", // ++
-								"2021", // ++
-								"2022", // ++
+								"2024", // ==
+								"2080", // !=
+								"2028", // !=
+								"2029", // ==
 								"2083", // Main
-								"2088", // ++
 								"2091", // Weston
 								"2092", // Derry
 								"2093", // Scott
