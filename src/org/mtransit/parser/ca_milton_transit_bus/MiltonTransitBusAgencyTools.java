@@ -201,6 +201,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 					return "6EC72D";
 				case 9:
 					return "F57814";
+				case 10:
+					return "E6C617";
 				case 30:
 					return null; // TODO ?
 				case 31:
@@ -262,6 +264,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				return "Willmott";
 			case 9:
 				return "Ontario South";
+			case 10:
+				return "Farmstead";
 			case 30:
 				return "Milton West Zone";
 			case 31:
@@ -400,10 +404,11 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2001", // Milton Crossroads at Walmart
 								"2004", // Thompson
-								"2016", // !=
-								"2017", // <>
-								"2169", // <> Milton GO Station
-								"2019", // <>
+								"2016", // != ==
+								"2017", // <> ==
+								"2203", // __ != Milton GO Station =>
+								"2169", // <> != Milton GO Station
+								"2019", // <> ==
 								"2020", // !=
 								"2033", // Heslop (Bronte)
 								"2037", // Derry
@@ -547,6 +552,25 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 								"2391", // Etheridge at Orr
 								"2392", // Farmstead (Etheridge)
 								"2393", // Britannia (Farmstead)
+						})) //
+				.compileBothTripSort());
+		map2.put(10L, new RouteTripSpec(10L, //
+				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), // Milton GO
+				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Britannia
+				.addTripSort(MDirectionType.NORTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"2420", // Britannia
+								"2052", // Bronte
+								"2017", // ==
+								"2169", // != Milton GO Station =>
+								"2203", // != Milton GO Station =>
+						})) //
+				.addTripSort(MDirectionType.SOUTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"2203", // Milton GO Station
+								"2407", // Serafini
+								"2420", // Britannia
+
 						})) //
 				.compileBothTripSort());
 		ALL_ROUTE_TRIPS2 = map2;
