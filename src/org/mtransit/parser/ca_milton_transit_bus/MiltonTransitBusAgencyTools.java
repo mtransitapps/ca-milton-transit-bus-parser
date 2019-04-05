@@ -30,7 +30,7 @@ import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
 // https://www.milton.ca/en/townhall/opendata.asp
-// https://www.milton.ca/en/resources/gtfs-milton.zip
+// http://www.miltontransit.ca/en/resourcesgeneral/gtfs/gtfs-milton.zip
 public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
@@ -323,19 +323,21 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				.addTripSort(MDirectionType.EAST.intValue(), //
 						Arrays.asList(new String[] { //
 						"2316", // No 5 Side (RR 25)
-								"2317", // Regional Road 25 (Peddle Rd)
-								"2318", // Regional Road 25 (Peddle Rd)
-								"2369", // Regional Road 25 (James Snow)
-								"2370", // James Snow
+								"2317", // ++ Regional Road 25 (Peddle Rd)
+								"2318", // ++ Regional Road 25 (Peddle Rd)
+								"2369", // ++ Regional Road 25 (James Snow)
+								"2370", // ++ James Snow
 								"2373", // ++
-								"2203", // Milton GO Station
+								"2017", // ==
+								"2203", // != Milton GO Station =>
+								"2169", // != Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
 						"2203", // Milton GO Station
 								"2333", // Highway 401 Park-And-Ride
-								"2367", // James Snow
-								"2368", // Regional Road 25 (Escarpment Way)
+								"2367", // ++ James Snow
+								"2368", // ++ Regional Road 25 (Escarpment Way)
 								"2316", // No 5 Side (RR 25)
 						})) //
 				.compileBothTripSort());
@@ -346,19 +348,21 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2351", // Milton GO Station
 								"2075", // ++
-								"2314", // James Snow
-								"2315", // Regional Road 25 (James Snow)
+								"2314", // ++ James Snow
+								"2315", // ++ Regional Road 25 (James Snow)
 								"2316", // No 5 Side (RR 25)
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
 						"2316", // No 5 Side (RR 25)
-								"2317", // Regional Road 25 (Peddle Rd)
-								"2318", // Regional Road 25 (Peddle Rd)
-								"2319", // Regional Road 25 (Escarpment Way)
-								"2320", // James Snow
+								"2317", // ++ Regional Road 25 (Peddle Rd)
+								"2318", // ++ Regional Road 25 (Peddle Rd)
+								"2319", // ++ Regional Road 25 (Escarpment Way)
+								"2320", // ++ James Snow
 								"2335", // ++
-								"2351" // Milton GO Station
+								"2017", // ==
+								"2351", // != Milton GO Station =>
+								"2169", // != Milton GO Station =>
 						})) //
 				.compileBothTripSort());
 		map2.put(1L + ROUTE_ID_ENDS_WITH_C, new RouteTripSpec(1L + ROUTE_ID_ENDS_WITH_C, // 1C
