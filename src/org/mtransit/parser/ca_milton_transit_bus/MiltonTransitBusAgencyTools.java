@@ -113,36 +113,40 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		if (gRoute.getRouteShortName() != null && gRoute.getRouteShortName().length() > 0 && Utils.isDigitsOnly(gRoute.getRouteShortName())) {
-			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
+		String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		if (rsn != null && rsn.length() > 0 && Utils.isDigitsOnly(rsn)) {
+			return Long.parseLong(rsn); // use route short name as route ID
 		}
 		int indexOf;
-		indexOf = gRoute.getRouteShortName().indexOf(EB);
+		indexOf = rsn.indexOf(EB);
 		if (indexOf >= 0) {
-			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
 		}
-		indexOf = gRoute.getRouteShortName().indexOf(WB);
+		indexOf = rsn.indexOf(WB);
 		if (indexOf >= 0) {
-			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
 		}
-		indexOf = gRoute.getRouteShortName().indexOf(AM);
+		indexOf = rsn.indexOf(AM);
 		if (indexOf >= 0) {
-			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
 		}
-		indexOf = gRoute.getRouteShortName().indexOf(PM);
+		indexOf = rsn.indexOf(PM);
 		if (indexOf >= 0) {
-			return Long.parseLong(gRoute.getRouteShortName().substring(0, indexOf)); // use route short name as route ID
+			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
 		}
-		Matcher matcher = DIGITS.matcher(gRoute.getRouteShortName());
+		Matcher matcher = DIGITS.matcher(rsn);
 		if (matcher.find()) {
 			long id = Long.parseLong(matcher.group());
-			if (gRoute.getRouteShortName().endsWith(A)) {
+			if (rsn.endsWith(A)) {
 				return ROUTE_ID_ENDS_WITH_A + id;
-			} else if (gRoute.getRouteShortName().endsWith(B)) {
+			} else if (rsn.endsWith(B)) {
 				return ROUTE_ID_ENDS_WITH_B + id;
-			} else if (gRoute.getRouteShortName().endsWith(C)) {
+			} else if (rsn.endsWith(C)) {
 				return ROUTE_ID_ENDS_WITH_C + id;
 			}
+		}
+		if ("DMSF".equalsIgnoreCase(rsn)) {
+			return 99_000L;
 		}
 		System.out.printf("\nUnexpected route ID for %s!\n", gRoute);
 		System.exit(-1);
@@ -151,24 +155,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		int indexOf;
-		indexOf = gRoute.getRouteShortName().indexOf(EB);
-		if (indexOf >= 0) {
-			return gRoute.getRouteShortName().substring(0, indexOf);
-		}
-		indexOf = gRoute.getRouteShortName().indexOf(WB);
-		if (indexOf >= 0) {
-			return gRoute.getRouteShortName().substring(0, indexOf);
-		}
-		indexOf = gRoute.getRouteShortName().indexOf(AM);
-		if (indexOf >= 0) {
-			return gRoute.getRouteShortName().substring(0, indexOf);
-		}
-		indexOf = gRoute.getRouteShortName().indexOf(PM);
-		if (indexOf >= 0) {
-			return gRoute.getRouteShortName().substring(0, indexOf);
-		}
-		return super.getRouteShortName(gRoute);
+		String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		return rsn;
 	}
 
 	private static final String ROUTE_COLOR_SCHOOL = "FFD800"; // School bus yellow
@@ -180,9 +168,9 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			routeColor = null;
 		}
 		if (StringUtils.isEmpty(routeColor)) {
-			if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
-				int rsn = Integer.parseInt(gRoute.getRouteShortName());
-				switch (rsn) {
+			String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+			if (Utils.isDigitsOnly(rsn)) {
+				switch (Integer.parseInt(rsn)) {
 				case 1:
 					return "EF2E31"; // TODO really?
 				case 2:
@@ -217,14 +205,17 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 					return ROUTE_COLOR_SCHOOL;
 				}
 			}
-			if ("1A".equalsIgnoreCase(gRoute.getRouteShortName())) {
+			if ("1A".equalsIgnoreCase(rsn)) {
 				return "EF2E31";
 			}
-			if ("1B".equalsIgnoreCase(gRoute.getRouteShortName())) {
+			if ("1B".equalsIgnoreCase(rsn)) {
 				return "B4131D";
 			}
-			if ("1C".equalsIgnoreCase(gRoute.getRouteShortName())) {
+			if ("1C".equalsIgnoreCase(rsn)) {
 				return "AB6326";
+			}
+			if ("DMSF".equalsIgnoreCase(rsn)) {
+				return null; // TODO
 			}
 			System.out.printf("\n%s: Unexpected route color for %s!\n", gRoute.getRouteId(), gRoute);
 			System.exit(-1);
@@ -233,18 +224,15 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		return routeColor;
 	}
 
-	private static final Pattern ENDS_WITH_BOUNDS = Pattern.compile("( (eastbound|westbound)$)", Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern AM_PM = Pattern.compile("(^|\\s){1}(am|pm)($|\\s){1}", Pattern.CASE_INSENSITIVE);
-	private static final String AM_PM_REPLACEMENT = "$1$3";
-
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		if (!StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			return cleanRouteLongName(gRoute.getRouteLongName());
+		String rlnS = gRoute.getRouteShortName(); // route long name & route short name are inverted in GTFS
+		if (!StringUtils.isEmpty(rlnS)) {
+			return cleanRouteLongName(rlnS);
 		}
-		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
-			int rsn = Integer.parseInt(gRoute.getRouteShortName());
+		String rsnS = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		if (Utils.isDigitsOnly(rsnS)) {
+			int rsn = Integer.parseInt(rsnS);
 			switch (rsn) {
 			case 1:
 				return "Industrial";
@@ -280,13 +268,13 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				return "School Special";
 			}
 		}
-		if ("1A".equalsIgnoreCase(gRoute.getRouteShortName())) {
+		if ("1A".equalsIgnoreCase(rsnS)) {
 			return "Industrial";
 		}
-		if ("1B".equalsIgnoreCase(gRoute.getRouteShortName())) {
+		if ("1B".equalsIgnoreCase(rsnS)) {
 			return "Industrial";
 		}
-		if ("1C".equalsIgnoreCase(gRoute.getRouteShortName())) {
+		if ("1C".equalsIgnoreCase(rsnS)) {
 			return "Industrial";
 		}
 		System.out.printf("\n%s: Unexpected route long name for %s!\n", gRoute.getRouteId(), gRoute);
@@ -294,12 +282,16 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		return null;
 	}
 
+	private static final Pattern STARTS_WITH_RSN = Pattern.compile("(^[\\d]+[a-zA-Z]? (\\- )?)", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern ENDS_WITH_BOUNDS = Pattern.compile("( (eastbound|westbound)$)", Pattern.CASE_INSENSITIVE);
+
 	private String cleanRouteLongName(String routeLongName) {
 		if (Utils.isUppercaseOnly(routeLongName, true, true)) {
 			routeLongName = routeLongName.toLowerCase(Locale.ENGLISH);
 		}
+		routeLongName = STARTS_WITH_RSN.matcher(routeLongName).replaceAll(StringUtils.EMPTY);
 		routeLongName = ENDS_WITH_BOUNDS.matcher(routeLongName).replaceAll(StringUtils.EMPTY);
-		routeLongName = AM_PM.matcher(routeLongName).replaceAll(AM_PM_REPLACEMENT);
 		return CleanUtils.cleanLabel(routeLongName);
 	}
 
@@ -370,7 +362,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Milton GO
 				.addTripSort(MDirectionType.NORTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2203", // Milton GO Station
+						"2203", // <> Milton GO Station
 								"2354", // ++
 								"2366", // !=
 								"2333", // <> Highway 401 Park-And-Ride
@@ -386,37 +378,9 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 								"2333", // <> Highway 401 Park-And-Ride
 								"2334", // !=
 								"2347", // ++
-								"2169", // Milton GO Station
-						})) //
-				.compileBothTripSort());
-		map2.put(2L, new RouteTripSpec(2L, //
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Milton Crossroads Ctr
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Milton Hospital
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
-						"2038", // Bronte (Milton Hospital)
-								"2039", // Farmstead
-								"2044", // Heslop (Commercial)
-								"2061", // !=
-								"2017", // <>
-								"2169", // Milton GO Station
-								"2019", // <>
-								"2063", // !=
-								"2001", // Milton Crossroads at Walmart
-						})) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
-						"2001", // Milton Crossroads at Walmart
-								"2004", // Thompson
-								"2016", // != ==
-								"2017", // <> ==
-								"2203", // __ != Milton GO Station =>
-								"2169", // <> != Milton GO Station
-								"2019", // <> ==
-								"2020", // !=
-								"2033", // Heslop (Bronte)
-								"2037", // Derry
-								"2038", // Bronte (Milton Hospital)
+								"2017", // ==
+								"2203", // != <> Milton GO Station => CONTINUE
+								"2169", // != Milton GO Station =>
 						})) //
 				.compileBothTripSort());
 		map2.put(3L, new RouteTripSpec(3L, //
@@ -426,13 +390,23 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2286", // Fourth Line (Louis St Laurent)
 								"2287", // Stewart
-								"2298", // ++
-								"2123", // Milton GO Station
+								"2295", // Waldie
+								"2296", // ==
+								"2277", // !== <>
+								"2278", // != <>
+								"2045", // !== != Thomas =>
+								"2297", // !=
+								"2123", // != Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2123", // Milton GO Station
-								"2273", // ++
+						"2123", // !== Milton GO Station <=
+								"2276", // != !=
+								"2277", // != <>
+								"2278", // !== <>
+								"2045", // != Thomas <=
+								"2202", // !=
+								"2279", // ==
 								"2283", // Earl
 								"2285", // Louis St Laurent
 								"2286", // Fourth Line (Louis St Laurent)
@@ -445,13 +419,22 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2147", // Fourth Line (Louis St Laurent)
 								"2159", // ++
-								"2168", // ==
-								"2123", // != Milton GO Station => CONTINUE
-								"2169", // != Milton GO Station => END
+								"2164", // ==
+								"2237", // !==
+								"3014", // != Bronte at Laurier
+								"2405", // !== Commercial =>
+								"2165", // !==
+								"2168", // != ==
+								"2123", // != != Milton GO Station => CONTINUE
+								"2169", // !== != Milton GO Station => END
 						})) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2123", // Milton GO Station
+						"2123", // != Milton GO Station <=
+								"2127", // !=
+								"2405", // != Commercial
+								"2217", // !=
+								"2128", // ==
 								"2134", // ++
 								"2139", // Armstrong (Ferguson)
 								"2147", // Fourth Line (Louis St Laurent)
@@ -464,13 +447,26 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2225", // Hepburn (Philbrook)
 								"2228", // Yates (Hepburn)
-								"2239", // ++
-								"2169", // Milton GO Station
+								"2233", // Holly
+								"2235", // ==
+								"2173", // !=
+								"2405", // != Commercial =>
+								"2236", // !==
+								"2168", // !=
+								"2169", // !== <> Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2169", // Milton GO Station
-								"2214", // ++
+						"2169", // !== <> Milton GO Station <=
+								"2124", // !=
+								"2218", // !==
+								"2405", // != Commercial <=
+								"2200", // !=
+								"2220", // ==
+								"2224", // ==
+								"3015", // !=
+								"3016", // !=
+								"2225", // ==
 								"2225", // Hepburn (Philbrook)
 						})) //
 				.compileBothTripSort());
@@ -481,26 +477,36 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2094", // Derry (Savoline)
 								"2096", // Hinchey
-								"2052", // == Bronte
+								"2108", // Main
+								"2109", // ==
+								"2030", // !==
+								"2045", // !== Thomas =>
+								"2052", // !== == Bronte
 								"2054", // != Brown
 								"2110", // != Fulton
 								"2055", // != Mill
 								"2057", // != TransCab Transfer Point Westbound
 								"2058", // == Court
-								"2203" // Milton GO Station
+								"2203" // !== Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
-						"2203", // Milton GO Station
+						"2203", // !== Milton GO Station
 								"2024", // ==
 								"2080", // !=
-								"2028", // !=
-								"2029", // ==
+								"2029", // !==
+								"2025", // !=
+								"2028", // !==
+								"2045", // !== Thomas <=
+								"2051", // !==
+								"2082", // ==
 								"2083", // Main
 								"2091", // Weston
-								"2092", // Derry
-								"2093", // Scott
-								"2094", // Derry (Savoline)
+								"2092", // == Derry
+								"2180", // !=
+								"2190", // !=
+								"2093", // != Scott
+								"2094", // == Derry (Savoline)
 						})) //
 				.compileBothTripSort());
 		map2.put(7L, new RouteTripSpec(7L, //
@@ -527,13 +533,26 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2254", // Louis St Laurent (Bronte)
 								"2259", // Ruhl (Farmstead)
+								"2264", // == Milton Sports Centre
+								"2176", // !== <>
+								"2177", // <>
+								"2178", // <>
+								"2431", // !=
+								"2405", // !== Commercial =>
+								"2195", // !==
 								"2200", // ++
-								"2169", // Milton GO Station
+								"2169", // !≃= Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
-						"2169", // Milton GO Station
-								"2175", // Ontario
+						"2169", // !== Milton GO Station <=
+								"2175", // !== Ontario
+								"2405", // !== Commercial <=
+								"2400", // !==
+								"2176", // == <>
+								"2177", // == <>
+								"2178", // == <>
+								"2246", // == !=
 								"2250", // Ruhl (Bronte)
 								"2254", // Louis St Laurent (Bronte)
 						})) //
@@ -543,19 +562,26 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Britannia
 				.addTripSort(MDirectionType.NORTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2393", // Britannia (Farmstead)
+						"2392", // == Farmstead (Etheridge)
+								"3009", // !==
+								"2426", // Milton Marketplaces - Bank of Montreal
+								"2405", // !== Commercial =>
+								"2393", // !== Britannia (Farmstead)
 								"2394", // RR 25 at Louis St Laurent (SE)
 								"2017", // ==
-								"2169", // Milton GO Station => SOUTH
-								"2123", // Milton GO Station
-								"2203", // Milton GO Station
+								"2169", // !== <> Milton GO Station => SOUTH
+								"2123", // !== Milton GO Station =>
+								"2203", // !== Milton GO Station =>
 						})) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2169", // Milton GO Station
+						"2169", // !== <> Milton GO Station <= NORTH
+								"2245", // !==
+								"2405", // !== Commercial <=
+								"3013", // !==
+								"2390", // ==
 								"2391", // Etheridge at Orr
-								"2392", // Farmstead (Etheridge)
-								"2393", // Britannia (Farmstead)
+								"2392", // == Farmstead (Etheridge)
 						})) //
 				.compileBothTripSort());
 		map2.put(10L, new RouteTripSpec(10L, //
@@ -565,6 +591,11 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"2420", // Britannia
 								"2052", // Bronte
+								"2054", // ==
+								"2055", // !=
+								"2057", // !=
+								"2110", // !=
+								"2058", // ==
 								"2017", // ==
 								"2169", // != Milton GO Station =>
 								"2203", // != Milton GO Station =>
@@ -574,7 +605,23 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						"2203", // Milton GO Station
 								"2407", // Serafini
 								"2420", // Britannia
-
+						})) //
+				.compileBothTripSort());
+		map2.put(99_000L, new RouteTripSpec(99_000L, //
+				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), // Commercial
+				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Milton Sports Centre - Park & Ride
+				.addTripSort(MDirectionType.NORTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"3017", // Milton Sports Centre - Park & Ride <= CONTINUE
+								"2264", // Milton Sports Centre
+								"2177", // Farmstead
+								"2405", // Commercial
+						})) //
+				.addTripSort(MDirectionType.SOUTH.intValue(), //
+						Arrays.asList(new String[] { //
+						"2405", // Commercial
+								"2407", // Serafini
+								"3017", // Milton Sports Centre - Park & Ride => CONTINUE
 						})) //
 				.compileBothTripSort());
 		ALL_ROUTE_TRIPS2 = map2;
@@ -583,6 +630,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	@Override
 	public String cleanStopOriginalId(String gStopId) {
 		gStopId = STARTS_WITH_MI.matcher(gStopId).replaceAll(StringUtils.EMPTY);
+		gStopId = ENDS_WITH_T.matcher(gStopId).replaceAll(StringUtils.EMPTY);
 		return gStopId;
 	}
 
@@ -615,7 +663,9 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return; // split
 		}
-		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId() == null ? 0 : gTrip.getDirectionId());
+		mTrip.setHeadsignString(cleanTripHeadsign( //
+				gTrip.getTripHeadsign()), //
+				gTrip.getDirectionId() == null ? 0 : gTrip.getDirectionId());
 	}
 
 	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^to )", Pattern.CASE_INSENSITIVE);
@@ -634,7 +684,26 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	@Override
 	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
 		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
-		if (mTrip.getRouteId() == 4L) {
+		if (mTrip.getRouteId() == 1L) {
+			if (Arrays.asList( //
+					StringUtils.EMPTY, //
+					"Milton Fairgrounds", //
+					"Milton Go" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("Milton Go", mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 2L) {
+			if (Arrays.asList( //
+					StringUtils.EMPTY, //
+					"Crossroads Ctr", //
+					"Milton Fairgrounds", //
+					"Milton Go" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("Milton Go", mTrip.getHeadsignId());
+				return true;
+			}
+		} else if (mTrip.getRouteId() == 4L) {
 			if (Arrays.asList( //
 					"Louis St. Laurent & 4th", //
 					"Regional Rd 25 & Britannia" //
@@ -675,11 +744,13 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	public static final Pattern STARTS_WITH_MI = Pattern.compile("((^){1}(mi))", Pattern.CASE_INSENSITIVE);
+	public static final Pattern ENDS_WITH_T = Pattern.compile("(t$)", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public int getStopId(GStop gStop) {
 		String stopId = gStop.getStopId();
 		stopId = STARTS_WITH_MI.matcher(stopId).replaceAll(StringUtils.EMPTY);
+		stopId = ENDS_WITH_T.matcher(stopId).replaceAll(StringUtils.EMPTY);
 		return Integer.parseInt(stopId);
 	}
 }
