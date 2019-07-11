@@ -113,7 +113,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		String rsn = gRoute.getRouteShortName();
 		if (rsn != null && rsn.length() > 0 && Utils.isDigitsOnly(rsn)) {
 			return Long.parseLong(rsn); // use route short name as route ID
 		}
@@ -155,7 +155,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		String rsn = gRoute.getRouteShortName();
 		return rsn;
 	}
 
@@ -168,7 +168,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			routeColor = null;
 		}
 		if (StringUtils.isEmpty(routeColor)) {
-			String rsn = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+			String rsn = gRoute.getRouteShortName();
 			if (Utils.isDigitsOnly(rsn)) {
 				switch (Integer.parseInt(rsn)) {
 				case 1:
@@ -226,11 +226,11 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		String rlnS = gRoute.getRouteShortName(); // route long name & route short name are inverted in GTFS
+		String rlnS = gRoute.getRouteLongName();
 		if (!StringUtils.isEmpty(rlnS)) {
 			return cleanRouteLongName(rlnS);
 		}
-		String rsnS = gRoute.getRouteLongName(); // route long name & route short name are inverted in GTFS
+		String rsnS = gRoute.getRouteShortName();
 		if (Utils.isDigitsOnly(rsnS)) {
 			int rsn = Integer.parseInt(rsnS);
 			switch (rsn) {
