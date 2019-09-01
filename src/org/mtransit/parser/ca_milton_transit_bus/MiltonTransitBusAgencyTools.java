@@ -309,30 +309,6 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
-		map2.put(1L + ROUTE_ID_ENDS_WITH_A, new RouteTripSpec(1L + ROUTE_ID_ENDS_WITH_A, // 1A
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // Milton GO
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // No 5 Side Road
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(new String[] { //
-						"2316", // No 5 Side (RR 25)
-								"2317", // ++ Regional Road 25 (Peddle Rd)
-								"2318", // ++ Regional Road 25 (Peddle Rd)
-								"2369", // ++ Regional Road 25 (James Snow)
-								"2370", // ++ James Snow
-								"2373", // ++
-								"2017", // ==
-								"2203", // != Milton GO Station =>
-								"2169", // != Milton GO Station =>
-						})) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(new String[] { //
-						"2203", // Milton GO Station
-								"2333", // Highway 401 Park-And-Ride
-								"2367", // ++ James Snow
-								"2368", // ++ Regional Road 25 (Escarpment Way)
-								"2316", // No 5 Side (RR 25)
-						})) //
-				.compileBothTripSort());
 		map2.put(1L + ROUTE_ID_ENDS_WITH_B, new RouteTripSpec(1L + ROUTE_ID_ENDS_WITH_B, // 1B
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), // RR 25
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) // Milton GO
@@ -662,6 +638,20 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return; // split
+		}
+		if (mRoute.getId() == 1L + ROUTE_ID_ENDS_WITH_A) { // 1A
+			if (gTrip.getDirectionId() == null) {
+				if (gTrip.getTripHeadsign().equals("REGIONAL RD 25 & BRITANNIA")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+					return;
+				} else if (gTrip.getTripHeadsign().equals("MILTON GO")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+					return;
+				}
+				System.out.printf("\n%s: Unexpected trips headsign for %s!\n", mTrip.getRouteId(), gTrip);
+				System.exit(-1);
+				return;
+			}
 		}
 		mTrip.setHeadsignString(cleanTripHeadsign( //
 				gTrip.getTripHeadsign()), //
