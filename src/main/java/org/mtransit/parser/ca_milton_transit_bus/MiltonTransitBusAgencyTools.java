@@ -29,8 +29,7 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
-// https://www.milton.ca/en/townhall/opendata.asp
-// http://www.miltontransit.ca/en/resourcesgeneral/gtfs/gtfs-milton.zip
+// https://milton.tmix.se/gtfs/gtfs-milton.zip
 public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
