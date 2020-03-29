@@ -48,7 +48,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	public void start(String[] args) {
 		System.out.printf("\nGenerating Milton Transit bus data...");
 		long start = System.currentTimeMillis();
-		this.serviceIds = extractUsefulServiceIds(args, this);
+		this.serviceIds = extractUsefulServiceIds(args, this, true);
 		super.start(args);
 		System.out.printf("\nGenerating Milton Transit bus data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
@@ -577,7 +577,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						})) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2203", // Milton GO Station
+						"2169", "2203", // Milton GO Station
+								"2124", // ==
 								"2407", // Serafini
 								"2420", // Britannia
 						})) //
