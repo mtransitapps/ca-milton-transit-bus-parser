@@ -564,7 +564,13 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Britannia
 				.addTripSort(MDirectionType.NORTH.intValue(), //
 						Arrays.asList(new String[] { //
-						"2420", // Britannia
+						"2418", // == Etheridge
+								"3009", // != Etheridge at Connaught
+								"3012", // != Etheridge at Chretien
+								"2419", // != Bronson, across from Belmore
+								"2421", // != Tasker
+								"2422", // == alongside Holbrook =>
+								"2420", // Britannia
 								"2052", // Bronte
 								"2054", // ==
 								"2055", // !=
@@ -580,7 +586,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						"2169", "2203", // Milton GO Station
 								"2124", // ==
 								"2407", // Serafini
-								"2420", // Britannia
+								"2418", // == Etheridge
 						})) //
 				.compileBothTripSort());
 		map2.put(99_000L, new RouteTripSpec(99_000L, //
