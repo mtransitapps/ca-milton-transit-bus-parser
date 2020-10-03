@@ -740,6 +740,35 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				return true;
 			}
 		}
+		if (mTrip.getRouteId() == 50L) {
+			if (Arrays.asList( //
+					"Milton District", // <>
+					"Scott & Derry", //
+					"St Francis Xavier" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("St Francis Xavier", mTrip.getHeadsignId());
+				return true;
+			}
+		}
+		if (mTrip.getRouteId() == 51L) {
+			if (Arrays.asList( //
+					"Milton District", // <>
+					"Derry & Scott", //
+					"St Francis Xavier" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("St Francis Xavier", mTrip.getHeadsignId());
+				return true;
+			}
+		}
+		if (mTrip.getRouteId() == 52L) {
+			if (Arrays.asList( //
+					"Milton Go", // <>
+					"St Francis Xavier" //
+			).containsAll(headsignsValues)) {
+				mTrip.setHeadsignString("St Francis Xavier", mTrip.getHeadsignId());
+				return true;
+			}
+		}
 		throw new MTLog.Fatal("%s: Unexpected trips to merge: %s & %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 	}
 
