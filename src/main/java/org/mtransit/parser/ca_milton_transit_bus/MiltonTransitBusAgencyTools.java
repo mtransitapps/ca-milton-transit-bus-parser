@@ -89,11 +89,6 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		return super.excludeTrip(gTrip);
 	}
 
-	@Override
-	public boolean excludeRoute(@NotNull GRoute gRoute) {
-		return super.excludeRoute(gRoute);
-	}
-
 	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
@@ -284,7 +279,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		throw new MTLog.Fatal("Unexpected route long name for %s!", gRoute.toStringPlus());
 	}
 
-	private static final Pattern STARTS_WITH_RSN = Pattern.compile("(^[\\d]+[a-zA-Z]? (- )?)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_RSN = Pattern.compile("(^[\\d]+[a-z]? (- )?)", Pattern.CASE_INSENSITIVE);
 
 	private String cleanRouteLongName(String routeLongName) {
 		if (Utils.isUppercaseOnly(routeLongName, true, true)) {
@@ -307,7 +302,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	private static final String MILTON_GO = "Milton Go";
 
-	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+	private static final HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
