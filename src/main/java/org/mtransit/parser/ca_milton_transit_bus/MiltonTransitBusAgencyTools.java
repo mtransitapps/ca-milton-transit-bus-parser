@@ -567,7 +567,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 						)) //
 				.compileBothTripSort());
 		//noinspection deprecation
-		map2.put(10L, new RouteTripSpec(10L, //
+		map2.put(10L, new RouteTripSpec(10L, // SPLITTED BECAUSE NO DIRECTION PROVIDED
 				MDirectionType.NORTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.NORTH.getId(), // Milton GO
 				MDirectionType.SOUTH.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.SOUTH.getId()) // Britannia
 				.addTripSort(MDirectionType.NORTH.intValue(), //
@@ -586,8 +586,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 								"2110", // !=
 								"2058", // ==
 								"2017", // ==
-								"2169", // != Milton GO Station =>
-								"2203" // != Milton GO Station =>
+								"2169", "2203" // != Milton GO Station =>
 						)) //
 				.addTripSort(MDirectionType.SOUTH.intValue(), //
 						Arrays.asList( //
