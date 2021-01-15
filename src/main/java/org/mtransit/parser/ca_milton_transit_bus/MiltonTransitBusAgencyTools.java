@@ -1,6 +1,5 @@
 package org.mtransit.parser.ca_milton_transit_bus;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
@@ -9,6 +8,7 @@ import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.SplitUtils.RouteTripSpec;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.mtransit.parser.StringUtils.EMPTY;
 
 // https://milton.tmix.se/gtfs/gtfs-milton.zip
 public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
@@ -285,7 +287,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		if (Utils.isUppercaseOnly(routeLongName, true, true)) {
 			routeLongName = routeLongName.toLowerCase(Locale.ENGLISH);
 		}
-		routeLongName = STARTS_WITH_RSN.matcher(routeLongName).replaceAll(StringUtils.EMPTY);
+		routeLongName = STARTS_WITH_RSN.matcher(routeLongName).replaceAll(EMPTY);
 		routeLongName = CleanUtils.cleanBounds(routeLongName);
 		return CleanUtils.cleanLabel(routeLongName);
 	}
@@ -620,8 +622,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopOriginalId(@NotNull String gStopId) {
-		gStopId = STARTS_WITH_MI.matcher(gStopId).replaceAll(StringUtils.EMPTY);
-		gStopId = ENDS_WITH_T.matcher(gStopId).replaceAll(StringUtils.EMPTY);
+		gStopId = STARTS_WITH_MI.matcher(gStopId).replaceAll(EMPTY);
+		gStopId = ENDS_WITH_T.matcher(gStopId).replaceAll(EMPTY);
 		return gStopId;
 	}
 
@@ -656,8 +658,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return; // split
 		}
-		final String tripHeadsign = gTrip.getTripHeadsignOrDefault();
 		if (mRoute.getId() == 1L + ROUTE_ID_ENDS_WITH_A) { // 1A
+			final String tripHeadsign = gTrip.getTripHeadsignOrDefault();
 			if (gTrip.getDirectionId() == null) {
 				if ("REGIONAL RD 25 & BRITANNIA".equals(tripHeadsign)) {
 					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
@@ -669,20 +671,17 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 				throw new MTLog.Fatal("%s: Unexpected trips headsign for %s!", mTrip.getRouteId(), gTrip);
 			}
 		}
-		mTrip.setHeadsignString(cleanTripHeadsign( //
-				tripHeadsign), //
-				gTrip.getDirectionId() == null ? 0 : gTrip.getDirectionId());
+		mTrip.setHeadsignString(
+				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+				gTrip.getDirectionId() == null ? 0 : gTrip.getDirectionId() // TODO gTrip.getDirectionIdOrDefault()
+		);
 	}
-
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^to )", Pattern.CASE_INSENSITIVE);
 
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
-		if (Utils.isUppercaseOnly(tripHeadsign, true, true)) {
-			tripHeadsign = tripHeadsign.toLowerCase(Locale.ENGLISH);
-		}
-		tripHeadsign = STARTS_WITH_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, tripHeadsign);
+		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		tripHeadsign = CleanUtils.cleanNumbers(tripHeadsign);
 		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
@@ -693,7 +692,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
 		if (mTrip.getRouteId() == 1L) {
 			if (Arrays.asList( //
-					StringUtils.EMPTY, //
+					EMPTY, //
 					"Milton Fairgrounds", //
 					"Milton Go" //
 			).containsAll(headsignsValues)) {
@@ -702,7 +701,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 			}
 		} else if (mTrip.getRouteId() == 2L) {
 			if (Arrays.asList( //
-					StringUtils.EMPTY, //
+					EMPTY, //
 					"Crossroads Ctr", //
 					"Milton Fairgrounds", //
 					"Milton Go" //
@@ -729,7 +728,8 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		} else if (mTrip.getRouteId() == 1L + ROUTE_ID_ENDS_WITH_A) { // 1A
 			if (Arrays.asList( //
 					"R.R. 25 & No. 5 Side Rd", //
-					MILTON_GO).containsAll(headsignsValues)) {
+					MILTON_GO
+			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString(MILTON_GO, mTrip.getHeadsignId());
 				return true;
 			}
@@ -769,10 +769,10 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
-		gStopName = gStopName.toLowerCase(Locale.ENGLISH);
+		gStopName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, gStopName);
 		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
+		gStopName = CleanUtils.cleanBounds(gStopName);
 		gStopName = CleanUtils.cleanSlashes(gStopName);
-		gStopName = CleanUtils.removePoints(gStopName);
 		gStopName = CleanUtils.cleanNumbers(gStopName);
 		gStopName = CleanUtils.cleanStreetTypes(gStopName);
 		return CleanUtils.cleanLabel(gStopName);
