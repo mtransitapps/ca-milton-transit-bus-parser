@@ -677,10 +677,15 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		);
 	}
 
+	@Override
+	public boolean directionFinderEnabled() {
+		return false; // DISABLED because direction_id NOT provided
+	}
+
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
-		tripHeadsign = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, tripHeadsign);
+		tripHeadsign = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, tripHeadsign, getIgnoredWords());
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		tripHeadsign = CleanUtils.cleanNumbers(tripHeadsign);
 		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
@@ -766,10 +771,17 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		throw new MTLog.Fatal("%s: Unexpected trips to merge: %s & %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 	}
 
+	private String[] getIgnoredWords() {
+		return new String[]{
+				"NE", "SE", "NW", "SW",
+				"GO",
+		};
+	}
+
 	@NotNull
 	@Override
 	public String cleanStopName(@NotNull String gStopName) {
-		gStopName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, gStopName);
+		gStopName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, gStopName, getIgnoredWords());
 		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
 		gStopName = CleanUtils.cleanBounds(gStopName);
 		gStopName = CleanUtils.cleanSlashes(gStopName);
