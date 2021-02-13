@@ -82,7 +82,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
-		if ("Not In Service".equalsIgnoreCase(gTrip.getTripHeadsign())) {
+		if ("not in service".equalsIgnoreCase(gTrip.getTripHeadsign())) {
 			return true;
 		}
 		if (this.serviceIdInts != null) {
@@ -283,10 +283,10 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern STARTS_WITH_RSN = Pattern.compile("(^[\\d]+[a-z]? (- )?)", Pattern.CASE_INSENSITIVE);
 
-	private String cleanRouteLongName(String routeLongName) {
-		if (Utils.isUppercaseOnly(routeLongName, true, true)) {
-			routeLongName = routeLongName.toLowerCase(Locale.ENGLISH);
-		}
+	@NotNull
+	@Override
+	public String cleanRouteLongName(@NotNull String routeLongName) {
+		routeLongName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, routeLongName, getIgnoredWords());
 		routeLongName = STARTS_WITH_RSN.matcher(routeLongName).replaceAll(EMPTY);
 		routeLongName = CleanUtils.cleanBounds(routeLongName);
 		return CleanUtils.cleanLabel(routeLongName);
@@ -761,7 +761,7 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		}
 		if (mTrip.getRouteId() == 52L) {
 			if (Arrays.asList( //
-					"Milton Go", // <>
+					"Milton GO", // <>
 					"St Francis Xavier" //
 			).containsAll(headsignsValues)) {
 				mTrip.setHeadsignString("St Francis Xavier", mTrip.getHeadsignId());
