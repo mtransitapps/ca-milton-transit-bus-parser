@@ -293,8 +293,12 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	@NotNull
 	@Override
 	public String cleanStopHeadSign(@NotNull GRoute gRoute, @NotNull GTrip gTrip, @NotNull GStopTime gStopTime, @NotNull String stopHeadsign) {
-		if (!StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			stopHeadsign = stopHeadsign.replaceAll(String.format(REMOVE_END_W_RLN_, gRoute.getRouteLongNameOrDefault()), EMPTY);
+		final String routeLongName = gRoute.getRouteLongNameOrDefault();
+		if (!StringUtils.isEmpty(routeLongName)) {
+			stopHeadsign = stopHeadsign.replaceAll(
+					String.format(REMOVE_END_W_RLN_, routeLongName),
+					EMPTY
+			);
 		}
 		return cleanStopHeadSign(stopHeadsign);
 	}
