@@ -1,13 +1,13 @@
 package org.mtransit.parser.ca_milton_transit_bus;
 
+import static org.mtransit.commons.StringUtils.EMPTY;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.ColorUtils;
 import org.mtransit.parser.DefaultAgencyTools;
-import org.mtransit.parser.MTLog;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GStopTime;
@@ -15,10 +15,7 @@ import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.mtransit.parser.StringUtils.EMPTY;
 
 // https://milton.tmix.se/gtfs/gtfs-milton.zip
 public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
@@ -52,182 +49,40 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 		return MAgency.ROUTE_TYPE_BUS;
 	}
 
-	private static final Pattern DIGITS = Pattern.compile("[\\d]+");
-
-	private static final String A = "A";
-	private static final String B = "B";
-	private static final String C = "C";
-
-	private static final String EB = "EB";
-	private static final String WB = "WB";
-	private static final String AM = "AM";
-	private static final String PM = "PM";
-
-	private static final long ROUTE_ID_ENDS_WITH_A = 10_000L;
-	private static final long ROUTE_ID_ENDS_WITH_B = 20_000L;
-	private static final long ROUTE_ID_ENDS_WITH_C = 30_000L;
+	@Override
+	public boolean defaultRouteIdEnabled() {
+		return true;
+	}
 
 	@Override
-	public long getRouteId(@NotNull GRoute gRoute) {
-		final String rsn = gRoute.getRouteShortName();
-		if (!rsn.isEmpty() && CharUtils.isDigitsOnly(rsn)) {
-			return Long.parseLong(rsn); // use route short name as route ID
-		}
-		int indexOf;
-		indexOf = rsn.indexOf(EB);
-		if (indexOf >= 0) {
-			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
-		}
-		indexOf = rsn.indexOf(WB);
-		if (indexOf >= 0) {
-			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
-		}
-		indexOf = rsn.indexOf(AM);
-		if (indexOf >= 0) {
-			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
-		}
-		indexOf = rsn.indexOf(PM);
-		if (indexOf >= 0) {
-			return Long.parseLong(rsn.substring(0, indexOf)); // use route short name as route ID
-		}
-		final Matcher matcher = DIGITS.matcher(rsn);
-		if (matcher.find()) {
-			long id = Long.parseLong(matcher.group());
-			if (rsn.endsWith(A)) {
-				return ROUTE_ID_ENDS_WITH_A + id;
-			} else if (rsn.endsWith(B)) {
-				return ROUTE_ID_ENDS_WITH_B + id;
-			} else if (rsn.endsWith(C)) {
-				return ROUTE_ID_ENDS_WITH_C + id;
-			}
-		}
-		if ("DMSF".equalsIgnoreCase(rsn)) {
-			return 99_000L;
-		}
-		throw new MTLog.Fatal("Unexpected route ID for %s!", gRoute);
+	public boolean useRouteShortNameForRouteId() {
+		return true;
 	}
 
 	private static final String ROUTE_COLOR_SCHOOL = "FFD800"; // School bus yellow
 
-	@SuppressWarnings("DuplicateBranchesInSwitch")
 	@Nullable
 	@Override
-	public String getRouteColor(@NotNull GRoute gRoute) {
-		String routeColor = gRoute.getRouteColor();
-		if (ColorUtils.BLACK.equalsIgnoreCase(routeColor)) {
-			routeColor = null;
+	public String fixColor(@Nullable String color) {
+		if (ColorUtils.BLACK.equalsIgnoreCase(color)) {
+			return null;
 		}
-		if (StringUtils.isEmpty(routeColor)) {
-			final String rsn = gRoute.getRouteShortName();
-			if (CharUtils.isDigitsOnly(rsn)) {
-				switch (Integer.parseInt(rsn)) {
-				case 1:
-					return "EF2E31"; // TODO really?
-				case 2:
-					return "263D96";
-				case 3:
-					return "195B1C";
-				case 4:
-					return "EC008C";
-				case 5:
-					return "FBBF15";
-				case 6:
-					return "A32B9B";
-				case 7:
-					return "00ADEF";
-				case 8:
-					return "6EC72D";
-				case 9:
-					return "F57814";
-				case 10:
-					return "E6C617";
-				case 30:
-					return null; // TODO ?
-				case 31:
-					return null; // TODO ?
-				case 32:
-					return null; // TODO ?
-				case 50:
-					return ROUTE_COLOR_SCHOOL;
-				case 51:
-					return ROUTE_COLOR_SCHOOL;
-				case 52:
-					return ROUTE_COLOR_SCHOOL;
-				}
-			}
-			if ("1A".equalsIgnoreCase(rsn)) {
-				return "EF2E31";
-			}
-			if ("1B".equalsIgnoreCase(rsn)) {
-				return "B4131D";
-			}
-			if ("1C".equalsIgnoreCase(rsn)) {
-				return "AB6326";
-			}
-			if ("DMSF".equalsIgnoreCase(rsn)) {
-				return null; // TODO
-			}
-			throw new MTLog.Fatal("Unexpected route color for '%s; !", gRoute.toStringPlus());
-		}
-		return routeColor;
+		return super.fixColor(color);
 	}
 
-	@SuppressWarnings("DuplicateBranchesInSwitch")
-	@NotNull
+	@Nullable
 	@Override
-	public String getRouteLongName(@NotNull GRoute gRoute) {
-		final String rlnS = gRoute.getRouteLongNameOrDefault();
-		if (!StringUtils.isEmpty(rlnS)) {
-			return cleanRouteLongName(rlnS);
+	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
+		final String rlnLC = gRoute.getRouteLongNameOrDefault().toLowerCase(Locale.ENGLISH);
+		if (rlnLC.contains("school")) {
+			return ROUTE_COLOR_SCHOOL;
 		}
-		final String rsnS = gRoute.getRouteShortName();
-		if (CharUtils.isDigitsOnly(rsnS)) {
-			final int rsn = Integer.parseInt(rsnS);
-			switch (rsn) {
-			case 1:
-				return "Industrial";
-			case 2:
-				return "Main";
-			case 3:
-				return "Trudeau";
-			case 4:
-				return "Thompson / Clark";
-			case 5:
-				return "Yates";
-			case 6:
-				return "Scott";
-			case 7:
-				return "Harrison";
-			case 8:
-				return "Willmott";
-			case 9:
-				return "Ontario South";
-			case 10:
-				return "Farmstead";
-			case 30:
-				return "Milton West Zone";
-			case 31:
-				return "Milton Central Zone";
-			case 32:
-				return "Milton East Zone";
-			case 50:
-				return "School Special";
-			case 51:
-				return "School Special";
-			case 52:
-				return "School Special";
-			}
-		}
-		if ("1A".equalsIgnoreCase(rsnS)) {
-			return "Industrial";
-		}
-		if ("1B".equalsIgnoreCase(rsnS)) {
-			return "Industrial";
-		}
-		if ("1C".equalsIgnoreCase(rsnS)) {
-			return "Industrial";
-		}
-		throw new MTLog.Fatal("Unexpected route long name for %s!", gRoute.toStringPlus());
+		return super.provideMissingRouteColor(gRoute);
+	}
+
+	@Override
+	public boolean defaultRouteLongNameEnabled() {
+		return true;
 	}
 
 	private static final Pattern STARTS_WITH_RSN = Pattern.compile("(^[\\d]+[a-z]? (- )?)", Pattern.CASE_INSENSITIVE);
