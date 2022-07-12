@@ -115,17 +115,12 @@ public class MiltonTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public boolean directionSplitterEnabled() {
-		return true;
-	}
-
-	@Override
 	public boolean directionSplitterEnabled(long routeId) {
 		//noinspection RedundantIfStatement
 		if (routeId == 2L) {
 			return true;
 		}
-		return false;
+		return super.directionSplitterEnabled(routeId);
 	}
 
 	@Override
